@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCapacita - Diagnóstico de Maturidade</title>
+    <title>EcoCapacita - Gestão de Logística Reversa</title>
     
     <!-- Fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,8 +13,11 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Configuração Tailwind (Paleta Sustentável: Verde Esmeralda e Azul Marinho) -->
+    <!-- Phosphor Icons para UI/UX visual -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <script>
+        // Configuração do Design System (Paleta Sustentável)
         tailwind.config = {
             theme: {
                 extend: {
@@ -23,8 +26,9 @@
                     },
                     colors: {
                         brand: {
-                            emerald: '#059669', // Verde Esmeralda
-                            navy: '#0F2C59',    // Azul Marinho
+                            emerald: '#059669', // Verde Esmeralda principal
+                            navy: '#0F2C59',    // Azul Marinho principal
+                            light: '#ECFDF5',   // Verde claro para backgrounds
                         }
                     }
                 }
@@ -33,220 +37,516 @@
     </script>
     
     <style>
-        /* Animações CSS Customizadas */
-        @keyframes fade-in-up {
-            0% { opacity: 0; transform: translateY(30px); }
-            100% { opacity: 1; transform: translateY(0); }
+        /* Transições suaves para a SPA */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
         }
-        @keyframes scale-in {
-            0% { opacity: 0; transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1); }
+        .view-section.active {
+            display: block;
         }
-        .animate-fade-in {
-            animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .animate-scale-in {
-            animation: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Estilização dos Checkboxes Mobile-First */
-        .check-card {
-            transition: all 0.2s ease-in-out;
-        }
+        /* Estilização customizada para os cards do checklist (Mobile-first) */
+        .check-card { transition: all 0.2s; }
         input[type="checkbox"]:checked + .check-card {
-            background-color: #ecfdf5; /* emerald-50 */
-            border-color: #059669;     /* emerald-600 */
+            background-color: #ECFDF5;
+            border-color: #059669;
         }
         input[type="checkbox"]:checked + .check-card .check-icon {
             color: #059669;
             opacity: 1;
         }
+        
+        /* Scrollbar customizada para tabelas */
+        .table-container::-webkit-scrollbar { height: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-brand-navy via-slate-800 to-brand-emerald min-h-screen flex items-center justify-center p-4 antialiased">
+<body class="bg-slate-50 text-slate-800 antialiased h-screen overflow-hidden flex flex-col md:flex-row">
 
-    <!-- Container Principal (Glassmorphism) -->
-    <main class="w-full max-w-md bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 overflow-hidden animate-fade-in">
-        
-        <!-- Cabeçalho -->
-        <header class="bg-white/50 border-b border-gray-200/50 p-6 text-center">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-brand-emerald/10 text-brand-emerald mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
-            </div>
-            <h1 class="text-2xl font-bold text-brand-navy tracking-tight">EcoCapacita</h1>
-            <p class="text-sm text-slate-500 mt-1">Diagnóstico de Maturidade em Campo</p>
-        </header>
-
-        <!-- Área de Conteúdo -->
-        <div class="p-6">
+    <!-- ==================== TELA DE LOGIN (FUNCIONALIDADE 1) ==================== -->
+    <div id="login-view" class="fixed inset-0 bg-brand-navy z-50 flex items-center justify-center p-4 view-section active">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-emerald to-teal-400"></div>
             
-            <!-- Formulário de Avaliação -->
-            <form id="checklist-form" onsubmit="calcularMaturidade(event)">
-                
-                <div class="mb-6">
-                    <label for="coop-name" class="block text-sm font-medium text-slate-700 mb-2">Nome da Cooperativa</label>
-                    <input type="text" id="coop-name" required placeholder="Ex: Cooperativa Recicla Mais" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-emerald focus:border-brand-emerald outline-none transition-shadow bg-white/50">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-light text-brand-emerald mb-4">
+                    <i class="ph ph-leaf text-3xl"></i>
                 </div>
+                <h1 class="text-2xl font-bold text-brand-navy">EcoCapacita</h1>
+                <p class="text-slate-500 text-sm mt-1">Acesso ao Sistema de Logística Reversa</p>
+            </div>
 
-                <p class="text-sm font-semibold text-slate-800 mb-3">Infraestrutura e Gestão Presentes:</p>
-                
-                <div class="space-y-3 mb-8">
-                    <!-- Item 1: Prensas -->
-                    <label class="relative flex cursor-pointer">
-                        <input type="checkbox" id="prensa" class="peer sr-only">
-                        <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50">
-                            <div class="flex flex-col">
-                                <span class="font-medium text-slate-800">Prensas Operantes</span>
-                                <span class="text-xs text-slate-500">Equipamento para compactação</span>
-                            </div>
-                            <svg class="check-icon h-6 w-6 opacity-20 text-slate-400 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </label>
-
-                    <!-- Item 2: Balanças -->
-                    <label class="relative flex cursor-pointer">
-                        <input type="checkbox" id="balanca" class="peer sr-only">
-                        <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50">
-                            <div class="flex flex-col">
-                                <span class="font-medium text-slate-800">Balanças Calibradas</span>
-                                <span class="text-xs text-slate-500">Medição precisa de massa</span>
-                            </div>
-                            <svg class="check-icon h-6 w-6 opacity-20 text-slate-400 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </label>
-
-                    <!-- Item 3: EPIs -->
-                    <label class="relative flex cursor-pointer">
-                        <input type="checkbox" id="epi" class="peer sr-only">
-                        <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50">
-                            <div class="flex flex-col">
-                                <span class="font-medium text-slate-800">Uso de EPIs</span>
-                                <span class="text-xs text-slate-500">Segurança dos cooperados</span>
-                            </div>
-                            <svg class="check-icon h-6 w-6 opacity-20 text-slate-400 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </label>
-
-                    <!-- Item 4: NF-e -->
-                    <label class="relative flex cursor-pointer">
-                        <input type="checkbox" id="nfe" class="peer sr-only">
-                        <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50">
-                            <div class="flex flex-col">
-                                <span class="font-medium text-slate-800">Emissão de NF-e</span>
-                                <span class="text-xs text-slate-500">Rastreabilidade fiscal ativa</span>
-                            </div>
-                            <svg class="check-icon h-6 w-6 opacity-20 text-slate-400 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </label>
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Perfil de Acesso</label>
+                    <select id="user-profile" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none bg-slate-50">
+                        <option value="gestor">Gestor (Entidade Gestora)</option>
+                        <option value="auditor">Auditor (Operação em Campo)</option>
+                    </select>
                 </div>
-
-                <button type="submit" class="w-full bg-brand-navy hover:bg-slate-800 text-white font-semibold py-4 rounded-xl shadow-lg transition-transform transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-slate-300 flex justify-center items-center gap-2">
-                    Calcular Score
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Senha (Simulada)</label>
+                    <input type="password" value="123456" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none bg-slate-50" readonly>
+                </div>
+                <button type="submit" class="w-full bg-brand-emerald hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg shadow-emerald-500/30 flex justify-center items-center gap-2">
+                    Entrar <i class="ph ph-sign-in text-xl"></i>
                 </button>
             </form>
+        </div>
+    </div>
 
-            <!-- Área de Resultado (Oculta inicialmente) -->
-            <div id="result-section" class="hidden text-center animate-scale-in py-4">
-                <p class="text-sm text-slate-500 mb-1">Resultado da Avaliação</p>
-                <h2 id="result-coop-name" class="text-xl font-bold text-slate-800 mb-6">Nome da Coop</h2>
-                
-                <div class="inline-flex flex-col items-center justify-center p-6 rounded-full w-40 h-40 border-4 mb-4 shadow-inner bg-slate-50" id="score-circle">
-                    <span class="text-sm font-medium text-slate-500 uppercase tracking-widest">Nível</span>
-                    <span id="score-level" class="text-6xl font-extrabold mt-[-4px]">A</span>
+    <!-- ==================== APLICAÇÃO PRINCIPAL (Oculta até o login) ==================== -->
+    <div id="main-app" class="hidden flex-1 h-full w-full flex flex-col md:flex-row">
+        
+        <!-- Sidebar (Desktop) -->
+        <aside class="hidden md:flex flex-col w-64 bg-brand-navy text-white h-full shadow-xl z-20">
+            <div class="p-6 border-b border-slate-700/50 flex items-center gap-3">
+                <i class="ph-fill ph-leaf text-brand-emerald text-2xl"></i>
+                <span class="font-bold text-lg tracking-wide">EcoCapacita</span>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <button onclick="switchTab('dashboard')" id="nav-desktop-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-brand-emerald/20 text-brand-emerald font-medium transition-colors">
+                    <i class="ph ph-squares-four text-xl"></i> Dashboard & Dados
+                </button>
+                <button onclick="switchTab('form')" id="nav-desktop-form" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="ph ph-clipboard-text text-xl"></i> Nova Auditoria
+                </button>
+            </nav>
+            <div class="p-4 border-t border-slate-700/50">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
+                        <i class="ph ph-user text-xl"></i>
+                    </div>
+                    <div>
+                        <p id="logged-user-name" class="text-sm font-semibold">Usuário</p>
+                        <p id="logged-user-role" class="text-xs text-slate-400">Perfil</p>
+                    </div>
                 </div>
-                
-                <p id="score-message" class="text-slate-600 text-sm mb-8 px-2 font-medium leading-relaxed"></p>
-                
-                <button type="button" onclick="reiniciarAvaliacao()" class="w-full bg-white border-2 border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold py-3 rounded-xl transition-colors focus:outline-none focus:ring-4 focus:ring-slate-100">
-                    Nova Avaliação
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 transition-colors text-sm">
+                    <i class="ph ph-sign-out"></i> Sair
                 </button>
             </div>
+        </aside>
 
-        </div>
-    </main>
+        <!-- Área de Conteúdo Central -->
+        <main class="flex-1 h-full overflow-y-auto bg-slate-50 relative pb-20 md:pb-0">
+            
+            <!-- Header Mobile (Aparece só no celular) -->
+            <header class="md:hidden bg-brand-navy text-white p-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-leaf text-brand-emerald text-xl"></i>
+                    <span class="font-bold">EcoCapacita</span>
+                </div>
+                <button onclick="logout()" class="text-slate-300 hover:text-white p-2">
+                    <i class="ph ph-sign-out text-xl"></i>
+                </button>
+            </header>
 
+            <div class="p-4 md:p-8 max-w-7xl mx-auto">
+                
+                <!-- ======== VIEW: DASHBOARD E TABELA (FUNCIONALIDADE 2 E 4) ======== -->
+                <section id="view-dashboard" class="view-section active">
+                    
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-slate-800">Visão Geral</h2>
+                        <p class="text-slate-500 text-sm">Acompanhe os indicadores de maturidade das cooperativas.</p>
+                    </div>
+
+                    <!-- Dashboard KPIs (FUNCIONALIDADE 2) -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Total Auditadas</span>
+                            <span id="kpi-total" class="text-3xl font-bold text-brand-navy">0</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-b-4 border-b-brand-emerald flex flex-col">
+                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Nível A (Alta)</span>
+                            <span id="kpi-a" class="text-3xl font-bold text-emerald-600">0</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-b-4 border-b-amber-400 flex flex-col">
+                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Nível B (Média)</span>
+                            <span id="kpi-b" class="text-3xl font-bold text-amber-500">0</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-b-4 border-b-red-400 flex flex-col">
+                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Nível C (Baixa)</span>
+                            <span id="kpi-c" class="text-3xl font-bold text-red-500">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Interativa (FUNCIONALIDADE 4) -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h3 class="font-semibold text-lg text-slate-800">Cooperativas Homologadas</h3>
+                            
+                            <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                                <div class="relative w-full md:w-64">
+                                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Buscar CNPJ ou Nome..." class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none">
+                                </div>
+                                <select id="filter-state" onchange="renderTable()" class="px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none bg-white">
+                                    <option value="ALL">Todos Estados</option>
+                                    <option value="GO">Goiás (GO)</option>
+                                    <option value="SP">São Paulo (SP)</option>
+                                    <option value="MG">Minas Gerais (MG)</option>
+                                </select>
+                                <button onclick="exportCSV()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-brand-navy text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    <i class="ph ph-download-simple text-lg"></i> Exportar CSV
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse min-w-[800px]">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                        <th class="p-4 font-semibold">Cooperativa / CNPJ</th>
+                                        <th class="p-4 font-semibold">Estado</th>
+                                        <th class="p-4 font-semibold text-center">Score / Nível</th>
+                                        <th class="p-4 font-semibold">Status Acreditação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body" class="divide-y divide-slate-100 text-sm">
+                                    <!-- Preenchido via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ======== VIEW: FORMULÁRIO DE AUDITORIA (FUNCIONALIDADE 3) ======== -->
+                <section id="view-form" class="view-section">
+                    <div class="max-w-2xl mx-auto">
+                        <div class="mb-6 flex items-center gap-3">
+                            <button onclick="switchTab('dashboard')" class="md:hidden p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600">
+                                <i class="ph ph-arrow-left"></i>
+                            </button>
+                            <div>
+                                <h2 class="text-2xl font-bold text-slate-800">Nova Auditoria</h2>
+                                <p class="text-slate-500 text-sm">Preencha os dados em campo para calcular a maturidade.</p>
+                            </div>
+                        </div>
+
+                        <form id="audit-form" onsubmit="saveAudit(event)" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                            
+                            <h3 class="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-100">Dados Cadastrais</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nome da Cooperativa</label>
+                                    <input type="text" id="form-name" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none" placeholder="Razão Social">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">CNPJ (Com máscara)</label>
+                                    <input type="text" id="form-cnpj" required maxlength="18" oninput="maskCNPJ(this)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none" placeholder="00.000.000/0000-00">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Estado (UF)</label>
+                                    <select id="form-state" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none bg-white">
+                                        <option value="GO">Goiás (GO)</option>
+                                        <option value="SP">São Paulo (SP)</option>
+                                        <option value="MG">Minas Gerais (MG)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <h3 class="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-100">Checklist de Infraestrutura (Mobile-first)</h3>
+                            <div class="space-y-3 mb-8">
+                                <label class="relative flex cursor-pointer">
+                                    <input type="checkbox" id="check-prensa" class="peer sr-only">
+                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+                                        <div class="flex flex-col">
+                                            <span class="font-medium text-slate-800">Prensas Operantes</span>
+                                            <span class="text-xs text-slate-500">Equipamento para compactação</span>
+                                        </div>
+                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
+                                    </div>
+                                </label>
+                                <label class="relative flex cursor-pointer">
+                                    <input type="checkbox" id="check-balanca" class="peer sr-only">
+                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+                                        <div class="flex flex-col">
+                                            <span class="font-medium text-slate-800">Balanças Calibradas</span>
+                                            <span class="text-xs text-slate-500">Medição precisa de massa</span>
+                                        </div>
+                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
+                                    </div>
+                                </label>
+                                <label class="relative flex cursor-pointer">
+                                    <input type="checkbox" id="check-epi" class="peer sr-only">
+                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+                                        <div class="flex flex-col">
+                                            <span class="font-medium text-slate-800">Uso de EPIs</span>
+                                            <span class="text-xs text-slate-500">Segurança dos cooperados</span>
+                                        </div>
+                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
+                                    </div>
+                                </label>
+                                <label class="relative flex cursor-pointer">
+                                    <input type="checkbox" id="check-nfe" class="peer sr-only">
+                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
+                                        <div class="flex flex-col">
+                                            <span class="font-medium text-slate-800">Emissão de NF-e</span>
+                                            <span class="text-xs text-slate-500">Capacidade de rastreabilidade</span>
+                                        </div>
+                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="w-full bg-brand-emerald hover:bg-emerald-700 text-white font-semibold py-4 rounded-xl transition-colors shadow-lg flex justify-center items-center gap-2">
+                                Salvar Avaliação e Calcular Score <i class="ph ph-calculator"></i>
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around p-2 pb-safe z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <button onclick="switchTab('dashboard')" id="nav-mobile-dashboard" class="flex flex-col items-center justify-center p-2 text-brand-emerald w-1/2">
+                <i class="ph-fill ph-squares-four text-2xl mb-1"></i>
+                <span class="text-[10px] font-semibold uppercase">Painel</span>
+            </button>
+            <button onclick="switchTab('form')" id="nav-mobile-form" class="flex flex-col items-center justify-center p-2 text-slate-400 hover:text-slate-600 w-1/2 transition-colors">
+                <i class="ph-fill ph-clipboard-text text-2xl mb-1"></i>
+                <span class="text-[10px] font-semibold uppercase">Auditar</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Script Application Logic -->
     <script>
-        function calcularMaturidade(event) {
-            // Previne o recarregamento da página (comportamento padrão do form)
-            event.preventDefault();
+        // ==================== ESTADO GLOBAL DA APLICAÇÃO (Dummy Data) ====================
+        let currentUser = null;
+        let auditData = [
+            { id: 1, name: 'Cooperativa Recicla Goiás', cnpj: '11.222.333/0001-44', state: 'GO', score: 4, level: 'A', status: 'Homologada', date: '15/10/2026' },
+            { id: 2, name: 'Eco São Paulo Central', cnpj: '55.666.777/0001-88', state: 'SP', score: 2, level: 'B', status: 'Em Adequação', date: '20/10/2026' },
+            { id: 3, name: 'Coop Triagem Sul', cnpj: '99.888.777/0001-22', state: 'MG', score: 1, level: 'C', status: 'Pendente', date: '21/10/2026' }
+        ];
 
-            // Coleta os dados dos inputs
-            const nomeCoop = document.getElementById('coop-name').value;
-            const hasPrensa = document.getElementById('prensa').checked;
-            const hasBalanca = document.getElementById('balanca').checked;
-            const hasEpi = document.getElementById('epi').checked;
-            const hasNfe = document.getElementById('nfe').checked;
+        // ==================== LÓGICA DE LOGIN ====================
+        function handleLogin(e) {
+            e.preventDefault();
+            const profile = document.getElementById('user-profile').value;
+            currentUser = { role: profile, name: profile === 'gestor' ? 'Gestor Regional' : 'Auditor de Campo' };
+            
+            // Atualiza UI com nome do usuário
+            document.getElementById('logged-user-name').textContent = currentUser.name;
+            document.getElementById('logged-user-role').textContent = profile === 'gestor' ? 'Acesso Administrativo' : 'Acesso Operacional';
 
-            // Lógica de Pontuação (Score)
-            let score = 0;
-            if (hasPrensa) score++;
-            if (hasBalanca) score++;
-            if (hasEpi) score++;
-            if (hasNfe) score++;
-
-            // Elementos de UI do resultado
-            const resultSection = document.getElementById('result-section');
-            const formSection = document.getElementById('checklist-form');
-            const resultCoopName = document.getElementById('result-coop-name');
-            const scoreLevel = document.getElementById('score-level');
-            const scoreMessage = document.getElementById('score-message');
-            const scoreCircle = document.getElementById('score-circle');
-
-            // Define o Nível, Cores e Mensagens baseado no Score
-            let nivel = '';
-            let corBorda = '';
-            let corTexto = '';
-            let mensagem = '';
-
-            if (score === 4) {
-                nivel = 'A';
-                corBorda = 'border-brand-emerald';
-                corTexto = 'text-brand-emerald';
-                mensagem = 'Excelente! Cooperativa estruturada, formalizada e pronta para gerar créditos com rastreabilidade total.';
-            } else if (score >= 2) {
-                nivel = 'B';
-                corBorda = 'border-amber-400';
-                corTexto = 'text-amber-500';
-                mensagem = 'Operacional, mas requer ações estruturantes. Necessita de investimentos em equipamentos ou formalização.';
-            } else {
-                nivel = 'C';
-                corBorda = 'border-red-400';
-                corTexto = 'text-red-500';
-                mensagem = 'Estágio inicial de maturidade. Requer intervenção imediata da Entidade Gestora para adequação física e legal.';
-            }
-
-            // Atualiza a UI
-            resultCoopName.textContent = nomeCoop;
-            scoreLevel.textContent = nivel;
-            scoreLevel.className = `text-6xl font-extrabold mt-[-4px] ${corTexto}`;
-            scoreCircle.className = `inline-flex flex-col items-center justify-center p-6 rounded-full w-40 h-40 border-4 mb-4 shadow-inner bg-slate-50 ${corBorda}`;
-            scoreMessage.textContent = mensagem;
-
-            // Transição Form -> Resultado
-            formSection.classList.add('hidden');
-            resultSection.classList.remove('hidden');
+            // Esconde Login, Mostra App Principal
+            document.getElementById('login-view').classList.remove('active');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // Inicializa visualizações
+            updateDashboard();
+            renderTable();
         }
 
-        function reiniciarAvaliacao() {
-            // Reseta o formulário
-            document.getElementById('checklist-form').reset();
+        function logout() {
+            currentUser = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-view').classList.add('active');
+            switchTab('dashboard'); // Reseta a tab
+        }
+
+        // ==================== NAVEGAÇÃO SPA (Tabs) ====================
+        function switchTab(tabId) {
+            // Esconde todas as seções
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            // Mostra a selecionada
+            document.getElementById(`view-${tabId}`).classList.add('active');
+
+            // Atualiza botões Desktop
+            const dtDash = document.getElementById('nav-desktop-dashboard');
+            const dtForm = document.getElementById('nav-desktop-form');
+            if(tabId === 'dashboard') {
+                dtDash.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-brand-emerald/20 text-brand-emerald font-medium transition-colors";
+                dtForm.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+            } else {
+                dtForm.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-brand-emerald/20 text-brand-emerald font-medium transition-colors";
+                dtDash.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+            }
+
+            // Atualiza botões Mobile
+            const mbDash = document.getElementById('nav-mobile-dashboard');
+            const mbForm = document.getElementById('nav-mobile-form');
+            if(tabId === 'dashboard') {
+                mbDash.className = "flex flex-col items-center justify-center p-2 text-brand-emerald w-1/2";
+                mbForm.className = "flex flex-col items-center justify-center p-2 text-slate-400 hover:text-slate-600 w-1/2 transition-colors";
+            } else {
+                mbForm.className = "flex flex-col items-center justify-center p-2 text-brand-emerald w-1/2";
+                mbDash.className = "flex flex-col items-center justify-center p-2 text-slate-400 hover:text-slate-600 w-1/2 transition-colors";
+            }
+        }
+
+        // ==================== DASHBOARD & TABELA ====================
+        function updateDashboard() {
+            document.getElementById('kpi-total').textContent = auditData.length;
+            document.getElementById('kpi-a').textContent = auditData.filter(d => d.level === 'A').length;
+            document.getElementById('kpi-b').textContent = auditData.filter(d => d.level === 'B').length;
+            document.getElementById('kpi-c').textContent = auditData.filter(d => d.level === 'C').length;
+        }
+
+        function getLevelBadge(level) {
+            if(level === 'A') return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold border border-emerald-200">A</span>`;
+            if(level === 'B') return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-bold border border-amber-200">B</span>`;
+            return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700 font-bold border border-red-200">C</span>`;
+        }
+
+        function getStatusBadge(status) {
+            if(status === 'Homologada') return `<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">Homologada</span>`;
+            if(status === 'Em Adequação') return `<span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold">Em Adequação</span>`;
+            return `<span class="px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-semibold">Pendente</span>`;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const stateFilter = document.getElementById('filter-state').value;
+
+            // Aplica filtros
+            const filteredData = auditData.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(search) || item.cnpj.includes(search);
+                const matchState = stateFilter === 'ALL' || item.state === stateFilter;
+                return matchSearch && matchState;
+            });
+
+            tbody.innerHTML = '';
             
-            // Transição Resultado -> Form
-            document.getElementById('result-section').classList.add('hidden');
-            document.getElementById('checklist-form').classList.remove('hidden');
+            if(filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500">Nenhuma cooperativa encontrada.</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <p class="font-medium text-slate-800">${item.name}</p>
+                        <p class="text-xs text-slate-500">CNPJ: ${item.cnpj}</p>
+                    </td>
+                    <td class="p-4">
+                        <span class="inline-flex items-center gap-1 text-slate-600 bg-slate-100 px-2 py-1 rounded-md text-xs font-medium">
+                            <i class="ph-fill ph-map-pin"></i> ${item.state}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        ${getLevelBadge(item.level)}
+                    </td>
+                    <td class="p-4">
+                        ${getStatusBadge(item.status)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ==================== LÓGICA DO FORMULÁRIO ====================
+        function maskCNPJ(input) {
+            let v = input.value;
+            v = v.replace(/\D/g, ""); // Remove não-números
+            v = v.replace(/^(\d{2})(\d)/, "$1.$2"); // Adiciona ponto
+            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); // Adiciona ponto
+            v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); // Adiciona barra
+            v = v.replace(/(\d{4})(\d)/, "$1-$2"); // Adiciona traço
+            input.value = v;
+        }
+
+        function saveAudit(e) {
+            e.preventDefault();
+            
+            // Coleta dados
+            const name = document.getElementById('form-name').value;
+            const cnpj = document.getElementById('form-cnpj').value;
+            const state = document.getElementById('form-state').value;
+            
+            // Calcula Score
+            let score = 0;
+            if(document.getElementById('check-prensa').checked) score++;
+            if(document.getElementById('check-balanca').checked) score++;
+            if(document.getElementById('check-epi').checked) score++;
+            if(document.getElementById('check-nfe').checked) score++;
+            
+            // Define Nível e Status
+            let level = 'C';
+            let status = 'Pendente';
+            if (score === 4) { level = 'A'; status = 'Homologada'; }
+            else if (score >= 2) { level = 'B'; status = 'Em Adequação'; }
+
+            // Salva na "base de dados"
+            const newAudit = {
+                id: auditData.length + 1,
+                name: name,
+                cnpj: cnpj,
+                state: state,
+                score: score,
+                level: level,
+                status: status,
+                date: new Date().toLocaleDateString('pt-BR')
+            };
+            
+            auditData.unshift(newAudit); // Adiciona no início
+            
+            // Atualiza views
+            updateDashboard();
+            renderTable();
+            
+            // Feedback e Reset
+            document.getElementById('audit-form').reset();
+            
+            // Feedback simples e troca para dashboard
+            const btn = document.querySelector('#audit-form button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="ph-fill ph-check-circle text-xl"></i> Salvo com Sucesso!`;
+            btn.classList.replace('bg-brand-emerald', 'bg-green-500');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.replace('bg-green-500', 'bg-brand-emerald');
+                switchTab('dashboard');
+                // Rola para o topo do dashboard
+                document.querySelector('main').scrollTo({top: 0, behavior: 'smooth'});
+            }, 1000);
+        }
+
+        // ==================== EXPORTAÇÃO CSV ====================
+        function exportCSV() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const stateFilter = document.getElementById('filter-state').value;
+            
+            const filteredData = auditData.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(search) || item.cnpj.includes(search);
+                const matchState = stateFilter === 'ALL' || item.state === stateFilter;
+                return matchSearch && matchState;
+            });
+
+            // Cria cabeçalho
+            let csvContent = "ID,Cooperativa,CNPJ,Estado,Score,Nivel,Status,Data\n";
+            
+            // Adiciona linhas
+            filteredData.forEach(row => {
+                // Escapa strings com vírgulas caso existam
+                const name = `"${row.name}"`;
+                csvContent += `${row.id},${name},${row.cnpj},${row.state},${row.score},${row.level},${row.status},${row.date}\n`;
+            });
+
+            // Cria blob e faz download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'relatorio_ecocapacita.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 </body>
