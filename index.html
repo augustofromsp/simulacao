@@ -1,553 +1,339 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCapacita - Gestão de Logística Reversa</title>
-    
-    <!-- Fonte Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Phosphor Icons para UI/UX visual -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <script>
-        // Configuração do Design System (Paleta Sustentável)
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            emerald: '#059669', // Verde Esmeralda principal
-                            navy: '#0F2C59',    // Azul Marinho principal
-                            light: '#ECFDF5',   // Verde claro para backgrounds
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style>
-        /* Transições suaves para a SPA */
-        .view-section {
-            display: none;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-        .view-section.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Estilização customizada para os cards do checklist (Mobile-first) */
-        .check-card { transition: all 0.2s; }
-        input[type="checkbox"]:checked + .check-card {
-            background-color: #ECFDF5;
-            border-color: #059669;
-        }
-        input[type="checkbox"]:checked + .check-card .check-icon {
-            color: #059669;
-            opacity: 1;
-        }
-        
-        /* Scrollbar customizada para tabelas */
-        .table-container::-webkit-scrollbar { height: 6px; }
-        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EcoCapacita – Entidade Gestora</title>
+<style>
+  :root { --navy:#0F2C59; --emerald:#047857; --amber:#b45309; --red:#b91c1c; --ink:#1e293b; --muted:#64748b; --line:#cbd5e1; --bg:#f1f5f9; --card:#fff; --on:#ecfdf5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; }
+  [hidden] { display:none !important; }
+  h2 { font-size:1.15rem; margin:0 0 12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 16px; }
+  input[type=text], input[type=password], input[type=search] { width:100%; min-height:48px; padding:10px 12px; font:inherit; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  label.field { display:block; font-weight:600; margin-bottom:6px; }
+  :is(input,button):focus-visible { outline:3px solid var(--navy); outline-offset:2px; }
+  button { min-height:48px; font:inherit; font-weight:700; border-radius:8px; border:2px solid var(--navy); cursor:pointer; padding:0 16px; }
+  .primary { background:var(--navy); color:#fff; width:100%; }
+  .secondary { background:#fff; color:var(--navy); width:100%; margin-top:16px; }
+  .error { color:var(--red); font-size:.9rem; margin:6px 0 0; min-height:1.3em; }
+
+  #login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; background:linear-gradient(135deg,var(--navy),#334155 55%,var(--emerald)); }
+  #login-screen .card { width:100%; max-width:420px; border-top:4px solid var(--emerald); }
+  #login-screen h1 { margin:0; color:var(--navy); text-align:center; }
+  #login-screen .sub { text-align:center; color:var(--muted); margin:4px 0 20px; font-size:.9rem; }
+  #login-form > div { margin-bottom:12px; }
+  .demo { background:var(--bg); border-radius:8px; padding:10px 12px; font-size:.85rem; color:var(--muted); margin:16px 0 0; }
+  .demo code { color:var(--ink); }
+
+  header { background:var(--navy); color:#fff; padding:12px 16px; border-bottom:4px solid var(--emerald); position:sticky; top:0; z-index:5; }
+  header .bar { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  header strong { font-size:1.2rem; }
+  header small { display:block; color:#bfdbfe; }
+  header button { background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.4); min-height:44px; }
+  main { max-width:1100px; margin:0 auto; padding:16px; display:grid; gap:16px; }
+  @media (min-width:900px) { main { grid-template-columns:360px 1fr; align-items:start; } .kpis { grid-column:1 / -1; } }
+
+  fieldset { border:0; margin:20px 0 0; padding:0; }
+  legend { font-weight:600; padding:0; margin-bottom:8px; }
+  .item { display:flex; align-items:center; gap:12px; min-height:56px; padding:10px 12px; margin-bottom:8px; border:1px solid var(--line); border-radius:8px; cursor:pointer; background:#fff; }
+  .item:has(input:checked) { background:var(--on); border-color:var(--emerald); }
+  .item:has(input:focus-visible) { outline:3px solid var(--navy); outline-offset:2px; }
+  .item input { width:24px; height:24px; accent-color:var(--emerald); flex:none; }
+  .count { color:var(--muted); font-size:.9rem; margin:4px 0 16px; }
+  #result { text-align:center; }
+  .badge { width:128px; height:128px; margin:4px auto 12px; border-radius:50%; border:6px solid var(--lvl,var(--line)); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--lvl,var(--ink)); }
+  .badge small { font-size:.75rem; color:var(--muted); }
+  .badge strong { font-size:3.4rem; line-height:1; }
+  #result h3 { margin:0 0 4px; overflow-wrap:anywhere; }
+  .score { color:var(--muted); margin:0 0 8px; }
+  .gaps { text-align:left; background:var(--bg); border-radius:8px; padding:12px 16px; }
+  .gaps p { margin:0 0 4px; font-weight:600; }
+  .gaps ul { margin:0; padding-left:20px; }
+
+  .kpis { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; order:-1; }
+  @media (min-width:700px) { .kpis { grid-template-columns:repeat(4,1fr); } }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .kpi span { display:block; color:var(--muted); font-size:.85rem; }
+  .kpi b { font-size:1.6rem; }
+
+  .tools { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+  .tools input { flex:1 1 200px; }
+  .tools button { background:#fff; color:var(--navy); }
+  .scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; min-width:520px; }
+  th { text-align:left; background:var(--bg); padding:10px 12px; }
+  td { padding:10px 12px; border-top:1px solid var(--line); }
+  .pill { display:inline-block; padding:2px 10px; border-radius:99px; font-size:.78rem; font-weight:600; }
+  .A { color:var(--emerald); } .B { color:var(--amber); } .C { color:var(--red); }
+  .pill.A { background:#d1fae5; } .pill.B { background:#fef3c7; } .pill.C { background:#fee2e2; }
+  @media (prefers-reduced-motion:no-preference) { #result:not([hidden]) { animation:show .25s ease-out; } @keyframes show { from { opacity:0; } to { opacity:1; } } }
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased h-screen overflow-hidden flex flex-col md:flex-row">
+<body>
 
-    <!-- ==================== TELA DE LOGIN (FUNCIONALIDADE 1) ==================== -->
-    <div id="login-view" class="fixed inset-0 bg-brand-navy z-50 flex items-center justify-center p-4 view-section active">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-emerald to-teal-400"></div>
-            
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-light text-brand-emerald mb-4">
-                    <i class="ph ph-leaf text-3xl"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-brand-navy">EcoCapacita</h1>
-                <p class="text-slate-500 text-sm mt-1">Acesso ao Sistema de Logística Reversa</p>
-            </div>
+<!-- ======================================================================
+     BANCO DE DADOS INLINE (dados iniciais / seed)
+     Na primeira abertura é copiado para o localStorage do navegador, que
+     passa a ser o banco "vivo". O botão "Restaurar dados" volta a este seed.
+     Senhas guardadas como SHA-256(salt:senha). Simulação didática: como todo
+     código roda no navegador, isto NÃO substitui autenticação de servidor.
+     ====================================================================== -->
+<script id="db-inicial" type="application/json">
+{
+  "usuarios": [
+    { "usuario": "gestor",  "nome": "Gestor EcoCapacita", "perfil": "gestor",  "salt": "eco-gestor",  "hash": "795dd7f9ce95dd7b83f93656bf931d6a86a5da57acb47a6e985254c6e861be34" },
+    { "usuario": "auditor", "nome": "Auditor de Campo",   "perfil": "auditor", "salt": "eco-auditor", "hash": "454c3e250170223f43ad25fb87d9db41af1b96af30a1661b503a15a7c8f11411" }
+  ],
+  "kpisBase": { "mapeadas": 142, "nivelA": 58, "acoes": 84, "potencial": "12.5k" },
+  "cooperativas": [
+    { "nome": "Coop Recicla SP",  "estado": "SP", "capacidade": "120 t/mês", "nivel": "A", "status": "Apta (Lastro)" },
+    { "nome": "Catadores do Sul", "estado": "PR", "capacidade": "45 t/mês",  "nivel": "B", "status": "Requer Prensa" },
+    { "nome": "Eco Vidas GO",     "estado": "GO", "capacidade": "15 t/mês",  "nivel": "C", "status": "Sem NF-e / EPIs" }
+  ]
+}
+</script>
 
-            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Perfil de Acesso</label>
-                    <select id="user-profile" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none bg-slate-50">
-                        <option value="gestor">Gestor (Entidade Gestora)</option>
-                        <option value="auditor">Auditor (Operação em Campo)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Senha (Simulada)</label>
-                    <input type="password" value="123456" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none bg-slate-50" readonly>
-                </div>
-                <button type="submit" class="w-full bg-brand-emerald hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-colors shadow-lg shadow-emerald-500/30 flex justify-center items-center gap-2">
-                    Entrar <i class="ph ph-sign-in text-xl"></i>
-                </button>
-            </form>
-        </div>
+<!-- [FORA DO ESCOPO] 1. LOGIN E PERFIS -->
+<div id="login-screen">
+  <div class="card">
+    <h1>EcoCapacita</h1>
+    <p class="sub">Acesso ao Sistema de Logística Reversa</p>
+    <form id="login-form" novalidate>
+      <div>
+        <label class="field" for="usuario">Usuário</label>
+        <input type="text" id="usuario" autocomplete="username" autocapitalize="none" spellcheck="false">
+      </div>
+      <div>
+        <label class="field" for="senha">Senha</label>
+        <input type="password" id="senha" autocomplete="current-password">
+      </div>
+      <p class="error" id="erro-login" role="alert"></p>
+      <button type="submit" class="primary">Entrar</button>
+    </form>
+    <p class="demo">Acessos de demonstração:<br>
+      <code>gestor</code> / <code>gestor123</code> – vê tudo e exporta<br>
+      <code>auditor</code> / <code>auditor123</code> – registra diagnósticos e consulta a rede</p>
+  </div>
+</div>
+
+<div id="main-app" hidden>
+  <header>
+    <div class="bar">
+      <div><strong>EcoCapacita</strong><small id="perfil-ativo"></small></div>
+      <button type="button" id="logout">Sair</button>
     </div>
+  </header>
 
-    <!-- ==================== APLICAÇÃO PRINCIPAL (Oculta até o login) ==================== -->
-    <div id="main-app" class="hidden flex-1 h-full w-full flex flex-col md:flex-row">
-        
-        <!-- Sidebar (Desktop) -->
-        <aside class="hidden md:flex flex-col w-64 bg-brand-navy text-white h-full shadow-xl z-20">
-            <div class="p-6 border-b border-slate-700/50 flex items-center gap-3">
-                <i class="ph-fill ph-leaf text-brand-emerald text-2xl"></i>
-                <span class="font-bold text-lg tracking-wide">EcoCapacita</span>
-            </div>
-            <nav class="flex-1 p-4 space-y-2">
-                <button onclick="switchTab('dashboard')" id="nav-desktop-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-brand-emerald/20 text-brand-emerald font-medium transition-colors">
-                    <i class="ph ph-squares-four text-xl"></i> Dashboard & Dados
-                </button>
-                <button onclick="switchTab('form')" id="nav-desktop-form" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                    <i class="ph ph-clipboard-text text-xl"></i> Nova Auditoria
-                </button>
-            </nav>
-            <div class="p-4 border-t border-slate-700/50">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
-                        <i class="ph ph-user text-xl"></i>
-                    </div>
-                    <div>
-                        <p id="logged-user-name" class="text-sm font-semibold">Usuário</p>
-                        <p id="logged-user-role" class="text-xs text-slate-400">Perfil</p>
-                    </div>
-                </div>
-                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 transition-colors text-sm">
-                    <i class="ph ph-sign-out"></i> Sair
-                </button>
-            </div>
-        </aside>
+  <main>
+    <!-- [NO ESCOPO] CHECKLIST + SCORE (Caso 2) -->
+    <section class="card" aria-labelledby="t-form">
+      <h2 id="t-form">Novo diagnóstico</h2>
+      <form id="checklist-form" novalidate>
+        <label class="field" for="coop-name">CNPJ ou nome da cooperativa</label>
+        <input type="text" id="coop-name" autocomplete="off" placeholder="Ex.: Coop. Recicla Mais" aria-describedby="erro-nome">
+        <p class="error" id="erro-nome" role="alert"></p>
+        <fieldset>
+          <legend>Infraestrutura em campo</legend>
+          <label class="item"><input type="checkbox" name="req" value="Prensas operantes"><span>Prensas operantes</span></label>
+          <label class="item"><input type="checkbox" name="req" value="Balanças calibradas"><span>Balanças calibradas</span></label>
+          <label class="item"><input type="checkbox" name="req" value="Uso de EPIs"><span>Uso de EPIs</span></label>
+          <label class="item"><input type="checkbox" name="req" value="Emissão de NF-e"><span>Emissão de NF-e</span></label>
+        </fieldset>
+        <p class="count" id="count" aria-live="polite">0 de 4 itens marcados</p>
+        <button type="submit" class="primary">Calcular score e salvar na rede</button>
+      </form>
+      <div id="result" hidden aria-live="polite" tabindex="-1">
+        <div class="badge" id="badge"><small>Nível</small><strong id="level">A</strong></div>
+        <h3 id="result-name"></h3>
+        <p class="score" id="result-score"></p>
+        <p id="result-msg"></p>
+        <div class="gaps" id="gaps" hidden><p>Itens pendentes:</p><ul id="gaps-list"></ul></div>
+        <button type="button" class="secondary" id="restart">Avaliar outra cooperativa</button>
+      </div>
+    </section>
 
-        <!-- Área de Conteúdo Central -->
-        <main class="flex-1 h-full overflow-y-auto bg-slate-50 relative pb-20 md:pb-0">
-            
-            <!-- Header Mobile (Aparece só no celular) -->
-            <header class="md:hidden bg-brand-navy text-white p-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
-                <div class="flex items-center gap-2">
-                    <i class="ph-fill ph-leaf text-brand-emerald text-xl"></i>
-                    <span class="font-bold">EcoCapacita</span>
-                </div>
-                <button onclick="logout()" class="text-slate-300 hover:text-white p-2">
-                    <i class="ph ph-sign-out text-xl"></i>
-                </button>
-            </header>
+    <!-- [FORA DO ESCOPO] 2. DASHBOARD DE KPIs (4 PF) – só gestor -->
+    <section class="kpis" aria-label="Visão geral" data-somente="gestor">
+      <div class="kpi"><span>Coop. mapeadas</span><b id="k-total"></b></div>
+      <div class="kpi"><span>Nível A (aptas)</span><b id="k-a"></b></div>
+      <div class="kpi"><span>Ações necessárias</span><b id="k-acoes"></b></div>
+      <div class="kpi"><span>Potencial (ton/mês)</span><b id="k-pot"></b></div>
+    </section>
 
-            <div class="p-4 md:p-8 max-w-7xl mx-auto">
-                
-                <!-- ======== VIEW: DASHBOARD E TABELA (FUNCIONALIDADE 2 E 4) ======== -->
-                <section id="view-dashboard" class="view-section active">
-                    
-                    <div class="mb-8">
-                        <h2 class="text-2xl font-bold text-slate-800">Visão Geral</h2>
-                        <p class="text-slate-500 text-sm">Acompanhe os indicadores de maturidade das cooperativas.</p>
-                    </div>
+    <!-- [FORA DO ESCOPO] 3. REDE DE OPERADORES + 4. BUSCA + 5. EXPORTAÇÃO -->
+    <section class="card" aria-labelledby="t-rede">
+      <h2 id="t-rede">Rede de operadores</h2>
+      <div class="tools">
+        <input type="search" id="busca" placeholder="Buscar cooperativa..." aria-label="Buscar cooperativa">
+        <button type="button" id="exportar" data-somente="gestor">Exportar CSV</button>
+        <button type="button" id="restaurar" data-somente="gestor">Restaurar dados</button>
+      </div>
+      <div class="scroll">
+        <table id="tabela">
+          <thead><tr><th>Cooperativa</th><th>Estado</th><th>Capacidade</th><th>Score</th><th>Status</th></tr></thead>
+          <tbody id="tabela-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
 
-                    <!-- Dashboard KPIs (FUNCIONALIDADE 2) -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
-                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Total Auditadas</span>
-                            <span id="kpi-total" class="text-3xl font-bold text-brand-navy">0</span>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-b-4 border-b-brand-emerald flex flex-col">
-                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Nível A (Alta)</span>
-                            <span id="kpi-a" class="text-3xl font-bold text-emerald-600">0</span>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-b-4 border-b-amber-400 flex flex-col">
-                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Nível B (Média)</span>
-                            <span id="kpi-b" class="text-3xl font-bold text-amber-500">0</span>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-b-4 border-b-red-400 flex flex-col">
-                            <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Nível C (Baixa)</span>
-                            <span id="kpi-c" class="text-3xl font-bold text-red-500">0</span>
-                        </div>
-                    </div>
+<script>
+  const $ = id => document.getElementById(id);
 
-                    <!-- Tabela Interativa (FUNCIONALIDADE 4) -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <h3 class="font-semibold text-lg text-slate-800">Cooperativas Homologadas</h3>
-                            
-                            <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                                <div class="relative w-full md:w-64">
-                                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Buscar CNPJ ou Nome..." class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none">
-                                </div>
-                                <select id="filter-state" onchange="renderTable()" class="px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none bg-white">
-                                    <option value="ALL">Todos Estados</option>
-                                    <option value="GO">Goiás (GO)</option>
-                                    <option value="SP">São Paulo (SP)</option>
-                                    <option value="MG">Minas Gerais (MG)</option>
-                                </select>
-                                <button onclick="exportCSV()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-brand-navy text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                    <i class="ph ph-download-simple text-lg"></i> Exportar CSV
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="table-container overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse min-w-[800px]">
-                                <thead>
-                                    <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                                        <th class="p-4 font-semibold">Cooperativa / CNPJ</th>
-                                        <th class="p-4 font-semibold">Estado</th>
-                                        <th class="p-4 font-semibold text-center">Score / Nível</th>
-                                        <th class="p-4 font-semibold">Status Acreditação</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-body" class="divide-y divide-slate-100 text-sm">
-                                    <!-- Preenchido via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
+  /* ---------- Camada de dados (banco inline + localStorage) ---------- */
+  const CHAVE_DB = 'ecocapacita_db_v1', CHAVE_SESSAO = 'ecocapacita_sessao';
+  const SEED = JSON.parse($('db-inicial').textContent);
+  const copiar = o => JSON.parse(JSON.stringify(o));
 
-                <!-- ======== VIEW: FORMULÁRIO DE AUDITORIA (FUNCIONALIDADE 3) ======== -->
-                <section id="view-form" class="view-section">
-                    <div class="max-w-2xl mx-auto">
-                        <div class="mb-6 flex items-center gap-3">
-                            <button onclick="switchTab('dashboard')" class="md:hidden p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600">
-                                <i class="ph ph-arrow-left"></i>
-                            </button>
-                            <div>
-                                <h2 class="text-2xl font-bold text-slate-800">Nova Auditoria</h2>
-                                <p class="text-slate-500 text-sm">Preencha os dados em campo para calcular a maturidade.</p>
-                            </div>
-                        </div>
+  function carregarDb() {
+    try { const s = localStorage.getItem(CHAVE_DB); if (s) return JSON.parse(s); } catch (e) {}
+    return copiar(SEED);
+  }
+  function salvarDb() { try { localStorage.setItem(CHAVE_DB, JSON.stringify(db)); } catch (e) {} }
+  let db = carregarDb();
+  let usuarioAtual = null;
 
-                        <form id="audit-form" onsubmit="saveAudit(event)" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
-                            
-                            <h3 class="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-100">Dados Cadastrais</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nome da Cooperativa</label>
-                                    <input type="text" id="form-name" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none" placeholder="Razão Social">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">CNPJ (Com máscara)</label>
-                                    <input type="text" id="form-cnpj" required maxlength="18" oninput="maskCNPJ(this)" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none" placeholder="00.000.000/0000-00">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Estado (UF)</label>
-                                    <select id="form-state" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-emerald outline-none bg-white">
-                                        <option value="GO">Goiás (GO)</option>
-                                        <option value="SP">São Paulo (SP)</option>
-                                        <option value="MG">Minas Gerais (MG)</option>
-                                    </select>
-                                </div>
-                            </div>
+  /* ---------- [FORA DO ESCOPO] Autenticação interna ---------- */
+  async function sha256(txt) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
-                            <h3 class="text-base font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-100">Checklist de Infraestrutura (Mobile-first)</h3>
-                            <div class="space-y-3 mb-8">
-                                <label class="relative flex cursor-pointer">
-                                    <input type="checkbox" id="check-prensa" class="peer sr-only">
-                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-                                        <div class="flex flex-col">
-                                            <span class="font-medium text-slate-800">Prensas Operantes</span>
-                                            <span class="text-xs text-slate-500">Equipamento para compactação</span>
-                                        </div>
-                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
-                                    </div>
-                                </label>
-                                <label class="relative flex cursor-pointer">
-                                    <input type="checkbox" id="check-balanca" class="peer sr-only">
-                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-                                        <div class="flex flex-col">
-                                            <span class="font-medium text-slate-800">Balanças Calibradas</span>
-                                            <span class="text-xs text-slate-500">Medição precisa de massa</span>
-                                        </div>
-                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
-                                    </div>
-                                </label>
-                                <label class="relative flex cursor-pointer">
-                                    <input type="checkbox" id="check-epi" class="peer sr-only">
-                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-                                        <div class="flex flex-col">
-                                            <span class="font-medium text-slate-800">Uso de EPIs</span>
-                                            <span class="text-xs text-slate-500">Segurança dos cooperados</span>
-                                        </div>
-                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
-                                    </div>
-                                </label>
-                                <label class="relative flex cursor-pointer">
-                                    <input type="checkbox" id="check-nfe" class="peer sr-only">
-                                    <div class="check-card w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer">
-                                        <div class="flex flex-col">
-                                            <span class="font-medium text-slate-800">Emissão de NF-e</span>
-                                            <span class="text-xs text-slate-500">Capacidade de rastreabilidade</span>
-                                        </div>
-                                        <i class="ph-fill ph-check-circle check-icon text-2xl text-slate-300 opacity-50"></i>
-                                    </div>
-                                </label>
-                            </div>
+  $('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const erro = $('erro-login');
+    const login = $('usuario').value.trim().toLowerCase(), senha = $('senha').value;
+    if (!login || !senha) { erro.textContent = 'Informe usuário e senha.'; return; }
+    if (!window.crypto || !crypto.subtle) { erro.textContent = 'Este navegador não suporta a verificação de senha. Abra o arquivo no Chrome, Edge ou Firefox atualizados.'; return; }
+    const u = db.usuarios.find(x => x.usuario === login);
+    const ok = u && (await sha256(u.salt + ':' + senha)) === u.hash;
+    if (!ok) { erro.textContent = 'Usuário ou senha incorretos.'; $('senha').value = ''; $('senha').focus(); return; }
+    erro.textContent = '';
+    try { sessionStorage.setItem(CHAVE_SESSAO, u.usuario); } catch (e2) {}
+    entrar(u);
+  });
 
-                            <button type="submit" class="w-full bg-brand-emerald hover:bg-emerald-700 text-white font-semibold py-4 rounded-xl transition-colors shadow-lg flex justify-center items-center gap-2">
-                                Salvar Avaliação e Calcular Score <i class="ph ph-calculator"></i>
-                            </button>
-                        </form>
-                    </div>
-                </section>
+  function entrar(u) {
+    usuarioAtual = u;
+    $('perfil-ativo').textContent = u.nome + ' (' + (u.perfil === 'gestor' ? 'Gestor' : 'Auditor de Campo') + ')';
+    document.querySelectorAll('[data-somente]').forEach(el => { el.hidden = el.dataset.somente !== u.perfil; });
+    $('login-screen').hidden = true;
+    $('main-app').hidden = false;
+    renderTudo();
+    $('coop-name').focus();
+  }
 
-            </div>
-        </main>
+  $('logout').addEventListener('click', () => {
+    try { sessionStorage.removeItem(CHAVE_SESSAO); } catch (e) {}
+    usuarioAtual = null;
+    $('login-form').reset();
+    $('main-app').hidden = true;
+    $('login-screen').hidden = false;
+    $('usuario').focus();
+  });
 
-        <!-- Bottom Navigation (Mobile) -->
-        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around p-2 pb-safe z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button onclick="switchTab('dashboard')" id="nav-mobile-dashboard" class="flex flex-col items-center justify-center p-2 text-brand-emerald w-1/2">
-                <i class="ph-fill ph-squares-four text-2xl mb-1"></i>
-                <span class="text-[10px] font-semibold uppercase">Painel</span>
-            </button>
-            <button onclick="switchTab('form')" id="nav-mobile-form" class="flex flex-col items-center justify-center p-2 text-slate-400 hover:text-slate-600 w-1/2 transition-colors">
-                <i class="ph-fill ph-clipboard-text text-2xl mb-1"></i>
-                <span class="text-[10px] font-semibold uppercase">Auditar</span>
-            </button>
-        </nav>
-    </div>
+  /* Mantém a sessão ao recarregar a página */
+  try {
+    const salvo = sessionStorage.getItem(CHAVE_SESSAO);
+    const u = salvo && db.usuarios.find(x => x.usuario === salvo);
+    if (u) entrar(u);
+  } catch (e) {}
 
-    <!-- Script Application Logic -->
-    <script>
-        // ==================== ESTADO GLOBAL DA APLICAÇÃO (Dummy Data) ====================
-        let currentUser = null;
-        let auditData = [
-            { id: 1, name: 'Cooperativa Recicla Goiás', cnpj: '11.222.333/0001-44', state: 'GO', score: 4, level: 'A', status: 'Homologada', date: '15/10/2026' },
-            { id: 2, name: 'Eco São Paulo Central', cnpj: '55.666.777/0001-88', state: 'SP', score: 2, level: 'B', status: 'Em Adequação', date: '20/10/2026' },
-            { id: 3, name: 'Coop Triagem Sul', cnpj: '99.888.777/0001-22', state: 'MG', score: 1, level: 'C', status: 'Pendente', date: '21/10/2026' }
-        ];
+  /* ---------- [NO ESCOPO] Checklist e score ----------
+     Regra: 4 = A | 2 ou 3 = B | 0 ou 1 = C (pesos iguais) */
+  const form = $('checklist-form'), nameInput = $('coop-name'), result = $('result');
+  const boxes = [...form.querySelectorAll('input[name="req"]')];
 
-        // ==================== LÓGICA DE LOGIN ====================
-        function handleLogin(e) {
-            e.preventDefault();
-            const profile = document.getElementById('user-profile').value;
-            currentUser = { role: profile, name: profile === 'gestor' ? 'Gestor Regional' : 'Auditor de Campo' };
-            
-            // Atualiza UI com nome do usuário
-            document.getElementById('logged-user-name').textContent = currentUser.name;
-            document.getElementById('logged-user-role').textContent = profile === 'gestor' ? 'Acesso Administrativo' : 'Acesso Operacional';
+  function classificar(score) {
+    if (score === 4) return { nivel:'A', cor:'var(--emerald)', msg:'Infraestrutura completa. Cooperativa apta.' };
+    if (score >= 2)  return { nivel:'B', cor:'var(--amber)',   msg:'Infraestrutura parcial. Precisa de investimento para chegar ao nível A.' };
+    return { nivel:'C', cor:'var(--red)', msg:'Faltam requisitos básicos de estrutura e de operação fiscal.' };
+  }
+  const contar = () => { $('count').textContent = boxes.filter(b => b.checked).length + ' de 4 itens marcados'; };
+  boxes.forEach(b => b.addEventListener('change', contar));
 
-            // Esconde Login, Mostra App Principal
-            document.getElementById('login-view').classList.remove('active');
-            document.getElementById('main-app').classList.remove('hidden');
-            
-            // Inicializa visualizações
-            updateDashboard();
-            renderTable();
-        }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = nameInput.value.trim();
+    if (!nome) { $('erro-nome').textContent = 'Informe o CNPJ ou o nome da cooperativa.'; nameInput.focus(); return; }
+    $('erro-nome').textContent = '';
 
-        function logout() {
-            currentUser = null;
-            document.getElementById('main-app').classList.add('hidden');
-            document.getElementById('login-view').classList.add('active');
-            switchTab('dashboard'); // Reseta a tab
-        }
+    const marcados = boxes.filter(b => b.checked).length;
+    const faltando = boxes.filter(b => !b.checked).map(b => b.value);
+    const r = classificar(marcados);
 
-        // ==================== NAVEGAÇÃO SPA (Tabs) ====================
-        function switchTab(tabId) {
-            // Esconde todas as seções
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            // Mostra a selecionada
-            document.getElementById(`view-${tabId}`).classList.add('active');
+    $('level').textContent = r.nivel;
+    $('badge').style.setProperty('--lvl', r.cor);
+    $('result-name').textContent = nome;
+    $('result-score').textContent = 'Score: ' + marcados + ' de 4';
+    $('result-msg').textContent = r.msg;
+    const ul = $('gaps-list'); ul.textContent = '';
+    faltando.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    $('gaps').hidden = faltando.length === 0;
+    form.hidden = true; result.hidden = false; result.focus();
 
-            // Atualiza botões Desktop
-            const dtDash = document.getElementById('nav-desktop-dashboard');
-            const dtForm = document.getElementById('nav-desktop-form');
-            if(tabId === 'dashboard') {
-                dtDash.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-brand-emerald/20 text-brand-emerald font-medium transition-colors";
-                dtForm.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
-            } else {
-                dtForm.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-brand-emerald/20 text-brand-emerald font-medium transition-colors";
-                dtDash.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
-            }
+    /* grava no banco e atualiza tabela e KPIs */
+    db.cooperativas.unshift({
+      nome, estado:'-', capacidade:'A definir', nivel:r.nivel,
+      status: r.nivel === 'A' ? 'Apta (nova)' : 'Pendente: ' + faltando.join(', '),
+      novo:true, score:marcados, por:usuarioAtual.usuario, data:new Date().toISOString()
+    });
+    salvarDb();
+    renderTudo();
+  });
 
-            // Atualiza botões Mobile
-            const mbDash = document.getElementById('nav-mobile-dashboard');
-            const mbForm = document.getElementById('nav-mobile-form');
-            if(tabId === 'dashboard') {
-                mbDash.className = "flex flex-col items-center justify-center p-2 text-brand-emerald w-1/2";
-                mbForm.className = "flex flex-col items-center justify-center p-2 text-slate-400 hover:text-slate-600 w-1/2 transition-colors";
-            } else {
-                mbForm.className = "flex flex-col items-center justify-center p-2 text-brand-emerald w-1/2";
-                mbDash.className = "flex flex-col items-center justify-center p-2 text-slate-400 hover:text-slate-600 w-1/2 transition-colors";
-            }
-        }
+  $('restart').addEventListener('click', () => {
+    form.reset(); contar(); result.hidden = true; form.hidden = false; nameInput.focus();
+  });
 
-        // ==================== DASHBOARD & TABELA ====================
-        function updateDashboard() {
-            document.getElementById('kpi-total').textContent = auditData.length;
-            document.getElementById('kpi-a').textContent = auditData.filter(d => d.level === 'A').length;
-            document.getElementById('kpi-b').textContent = auditData.filter(d => d.level === 'B').length;
-            document.getElementById('kpi-c').textContent = auditData.filter(d => d.level === 'C').length;
-        }
+  /* ---------- [FORA DO ESCOPO] Tabela, KPIs, busca, exportação ---------- */
+  function renderTabela() {
+    const tb = $('tabela-body'); tb.textContent = '';
+    db.cooperativas.forEach(c => {
+      const tr = document.createElement('tr');
+      [c.nome, c.estado, c.capacidade].forEach(t => { const td = document.createElement('td'); td.textContent = t; tr.appendChild(td); });
+      const tdS = document.createElement('td'), b = document.createElement('b');
+      b.className = c.nivel; b.textContent = c.nivel; tdS.appendChild(b); tr.appendChild(tdS);
+      const tdT = document.createElement('td'), p = document.createElement('span');
+      p.className = 'pill ' + c.nivel; p.textContent = c.status; tdT.appendChild(p); tr.appendChild(tdT);
+      tb.appendChild(tr);
+    });
+    filtrar();
+  }
 
-        function getLevelBadge(level) {
-            if(level === 'A') return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold border border-emerald-200">A</span>`;
-            if(level === 'B') return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 text-amber-700 font-bold border border-amber-200">B</span>`;
-            return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700 font-bold border border-red-200">C</span>`;
-        }
+  function renderKpis() {
+    const k = db.kpisBase, novos = db.cooperativas.filter(c => c.novo);
+    const novosA = novos.filter(c => c.nivel === 'A').length;
+    $('k-total').textContent = k.mapeadas + novos.length;
+    $('k-a').textContent = k.nivelA + novosA;
+    $('k-acoes').textContent = k.acoes + (novos.length - novosA);
+    $('k-pot').textContent = k.potencial;
+  }
 
-        function getStatusBadge(status) {
-            if(status === 'Homologada') return `<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">Homologada</span>`;
-            if(status === 'Em Adequação') return `<span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold">Em Adequação</span>`;
-            return `<span class="px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-semibold">Pendente</span>`;
-        }
+  function renderTudo() { renderTabela(); renderKpis(); }
 
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const stateFilter = document.getElementById('filter-state').value;
+  function filtrar() {
+    const q = $('busca').value.trim().toLowerCase();
+    $('tabela-body').querySelectorAll('tr').forEach(tr => { tr.hidden = !tr.cells[0].textContent.toLowerCase().includes(q); });
+  }
+  $('busca').addEventListener('input', filtrar);
 
-            // Aplica filtros
-            const filteredData = auditData.filter(item => {
-                const matchSearch = item.name.toLowerCase().includes(search) || item.cnpj.includes(search);
-                const matchState = stateFilter === 'ALL' || item.state === stateFilter;
-                return matchSearch && matchState;
-            });
+  $('exportar').addEventListener('click', () => {
+    const esc = t => '"' + t.replace(/"/g, '""') + '"';
+    const linhas = [...$('tabela').rows].map(r => [...r.cells].map(c => esc(c.textContent.trim())).join(';'));
+    const blob = new Blob(['\ufeff' + linhas.join('\r\n')], { type:'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'operadores_logisticos.csv'; a.click();
+    URL.revokeObjectURL(a.href);
+  });
 
-            tbody.innerHTML = '';
-            
-            if(filteredData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500">Nenhuma cooperativa encontrada.</td></tr>`;
-                return;
-            }
-
-            filteredData.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-4">
-                        <p class="font-medium text-slate-800">${item.name}</p>
-                        <p class="text-xs text-slate-500">CNPJ: ${item.cnpj}</p>
-                    </td>
-                    <td class="p-4">
-                        <span class="inline-flex items-center gap-1 text-slate-600 bg-slate-100 px-2 py-1 rounded-md text-xs font-medium">
-                            <i class="ph-fill ph-map-pin"></i> ${item.state}
-                        </span>
-                    </td>
-                    <td class="p-4 text-center">
-                        ${getLevelBadge(item.level)}
-                    </td>
-                    <td class="p-4">
-                        ${getStatusBadge(item.status)}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // ==================== LÓGICA DO FORMULÁRIO ====================
-        function maskCNPJ(input) {
-            let v = input.value;
-            v = v.replace(/\D/g, ""); // Remove não-números
-            v = v.replace(/^(\d{2})(\d)/, "$1.$2"); // Adiciona ponto
-            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); // Adiciona ponto
-            v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); // Adiciona barra
-            v = v.replace(/(\d{4})(\d)/, "$1-$2"); // Adiciona traço
-            input.value = v;
-        }
-
-        function saveAudit(e) {
-            e.preventDefault();
-            
-            // Coleta dados
-            const name = document.getElementById('form-name').value;
-            const cnpj = document.getElementById('form-cnpj').value;
-            const state = document.getElementById('form-state').value;
-            
-            // Calcula Score
-            let score = 0;
-            if(document.getElementById('check-prensa').checked) score++;
-            if(document.getElementById('check-balanca').checked) score++;
-            if(document.getElementById('check-epi').checked) score++;
-            if(document.getElementById('check-nfe').checked) score++;
-            
-            // Define Nível e Status
-            let level = 'C';
-            let status = 'Pendente';
-            if (score === 4) { level = 'A'; status = 'Homologada'; }
-            else if (score >= 2) { level = 'B'; status = 'Em Adequação'; }
-
-            // Salva na "base de dados"
-            const newAudit = {
-                id: auditData.length + 1,
-                name: name,
-                cnpj: cnpj,
-                state: state,
-                score: score,
-                level: level,
-                status: status,
-                date: new Date().toLocaleDateString('pt-BR')
-            };
-            
-            auditData.unshift(newAudit); // Adiciona no início
-            
-            // Atualiza views
-            updateDashboard();
-            renderTable();
-            
-            // Feedback e Reset
-            document.getElementById('audit-form').reset();
-            
-            // Feedback simples e troca para dashboard
-            const btn = document.querySelector('#audit-form button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="ph-fill ph-check-circle text-xl"></i> Salvo com Sucesso!`;
-            btn.classList.replace('bg-brand-emerald', 'bg-green-500');
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.classList.replace('bg-green-500', 'bg-brand-emerald');
-                switchTab('dashboard');
-                // Rola para o topo do dashboard
-                document.querySelector('main').scrollTo({top: 0, behavior: 'smooth'});
-            }, 1000);
-        }
-
-        // ==================== EXPORTAÇÃO CSV ====================
-        function exportCSV() {
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const stateFilter = document.getElementById('filter-state').value;
-            
-            const filteredData = auditData.filter(item => {
-                const matchSearch = item.name.toLowerCase().includes(search) || item.cnpj.includes(search);
-                const matchState = stateFilter === 'ALL' || item.state === stateFilter;
-                return matchSearch && matchState;
-            });
-
-            // Cria cabeçalho
-            let csvContent = "ID,Cooperativa,CNPJ,Estado,Score,Nivel,Status,Data\n";
-            
-            // Adiciona linhas
-            filteredData.forEach(row => {
-                // Escapa strings com vírgulas caso existam
-                const name = `"${row.name}"`;
-                csvContent += `${row.id},${name},${row.cnpj},${row.state},${row.score},${row.level},${row.status},${row.date}\n`;
-            });
-
-            // Cria blob e faz download
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'relatorio_ecocapacita.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-    </script>
+  $('restaurar').addEventListener('click', () => {
+    if (!confirm('Apagar os diagnósticos cadastrados e voltar aos dados iniciais?')) return;
+    db = copiar(SEED); salvarDb(); renderTudo();
+  });
+</script>
 </body>
 </html>
