@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo!</title>
+    
+    <!-- Importação da fonte Inter do Google Fonts para um visual mais limpo e moderno -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Importação do Tailwind CSS para a estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuração da fonte padrão no Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Pequena animação customizada para o surgimento do card */
+        @keyframes fade-in-up {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center p-4 antialiased text-slate-800">
+
+    <!-- Container principal (Card) -->
+    <main class="max-w-lg w-full bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden text-center animate-fade-in-up border border-white/20">
+        
+        <!-- Área superior do card com ícone/ilustração -->
+        <div class="bg-indigo-50/50 pt-12 pb-6 flex justify-center">
+            <!-- Ícone de Boas-vindas em SVG -->
+            <div class="bg-white p-4 rounded-full shadow-md text-indigo-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Conteúdo de texto e Botão -->
+        <div class="p-8 md:p-12 pt-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                Bem-vindo!
+            </h1>
+            
+            <p class="text-lg text-slate-600 mb-10 leading-relaxed font-light">
+                Estamos muito felizes em ter você aqui. Prepare-se para descobrir recursos incríveis e uma experiência feita especialmente para você.
+            </p>
+            
+            <!-- Botão de Call to Action (CTA) -->
+            <button class="w-full sm:w-auto px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full shadow-lg hover:shadow-indigo-500/40 transform transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                Começar Agora
+            </button>
+        </div>
+
+        <!-- Rodapé do Card -->
+        <div class="bg-slate-50 p-6 border-t border-slate-100">
+            <p class="text-sm text-slate-500 font-medium">
+                Precisando de ajuda? <a href="#" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors">Fale com o suporte</a>.
+            </p>
+        </div>
+        
+    </main>
+
+</body>
+</html>
